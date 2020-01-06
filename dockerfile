@@ -1,24 +1,28 @@
-  
-FROM alpine:3.10
+FROM ubuntu:18.04
 
-ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
+ENV NVM_DIR /usr/local/nvm
 
-RUN adduser -D -g '' node
-RUN apk add --no-cache --virtual .build-deps \
-        curl 
+# Create a non-root node user
+RUN useradd -mrs /bin/bash node
 
-RUN apk update
-RUN apk add --update git nodejs npm
+# Install deps and allow node user to use NVM
+RUN apt-get update
+RUN apt-get -y install build-essential libssl-dev git curl vim
+RUN mkdir $NVM_DIR
+RUN chown node:node /usr/local/nvm
 
-# Create the g
-RUN mkdir /home/node/dev
-RUN chown -R node:node /home/node/dev
 USER node
-RUN git config --global user.name "Quinton Williams"
-RUN git config --global user.email "quinw68@gmail.com"
+SHELL ["/bin/bash", "-c"]
+RUN curl https://raw.githubusercontent.com/creationix/nvm/v0.35.2/install.sh | bash
+RUN source ${NVM_DIR}/nvm.sh \
+    && nvm install 12 \
+    && npm install -g serverless typescript
 
-VOLUME /home/node/dev
-WORKDIR /home/node/dev
+# Make a copy of bashrc to be used by the home directory
+# The home directory is where the user's VOLUME will be
+RUN cp ~/.bashrc /tmp
+VOLUME /home/node
+WORKDIR /home/node
 
-ENV PATH /home/node/.npm-global/bin:$PATH
-RUN npm install -g typescript ts-node serverless
+COPY init.sh /init.sh
+ENTRYPOINT /init.sh && /bin/bash
