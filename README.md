@@ -19,7 +19,7 @@ Run the docker image as a detached container with the current directory mounted 
 This mounts a volume of the docker image to the current directory (Windows-specific)
 
 ```
-docker run --rm -dt -v <local directory>:/home/node/dev quinw68/node-dev-vscode:latest
+docker run --rm -dt -v C:\Users\home\directory:/home/node/dev quinw68/node-dev-vscode:latest
 ```
 
 In the docker extension under <b>CONTAINERS</b> right click on the container and choose "Attach Visual Studio Code"
